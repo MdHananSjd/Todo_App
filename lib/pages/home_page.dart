@@ -4,13 +4,16 @@ import 'package:todo_app/util/dialog_box.dart';
 import 'package:todo_app/util/todo_tile.dart';
 
 class HomePage extends StatefulWidget {
-HomePage({super.key});
-
+const HomePage({super.key});
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+
+  //text controller
+  final _controller = TextEditingController();
+
   //list of todo items
   List toDoList = [
     ['Make Todo App', false],
@@ -22,11 +25,32 @@ class _HomePageState extends State<HomePage> {
       toDoList[index][1] = !toDoList[index][1];
     });
   }
+
+  //Saving a new task
+  void saveNewTask(){
+    setState(() {
+      toDoList.add([_controller.text, false]);
+      _controller.clear();
+    });
+    Navigator.of(context).pop();
+  }
+
   //Creating new task
   void createNewTask(){
     showDialog(context: context, builder: (context){
-      return DialogBox();
+      return DialogBox(
+        controller: _controller,
+        onSave: saveNewTask,
+        onCancel: () => Navigator.of(context).pop(), //Goes back to the previous state
+      );
     },);
+  }
+
+  //Deleting a task
+  void deleteTask(int index){
+    setState(() {
+      toDoList.removeAt(index);
+    });
   }
 
   @override
@@ -53,7 +77,8 @@ class _HomePageState extends State<HomePage> {
           return ToDoTile(
             taskName: toDoList[index][0],
             taskCompleted: toDoList[index][1],
-            onChanged: (value) => checkBoxChanged(value, index)
+            onChanged: (value) => checkBoxChanged(value, index),
+            deleteFunction: (context) => deleteTask(index),
           );
         },
       ),
